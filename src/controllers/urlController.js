@@ -3,6 +3,7 @@ const express = require('express')
 const validUrl = require('valid-url')
 
 const shortid = require('shortid')
+const baseUrl ="localhost:3000"
 
 
 
@@ -10,7 +11,7 @@ const urlModel = require("../models/urlModel");
 const validator = require("../validator/validations");
 
 
-const baseUrl = 'http:localhost:3000'; //'https:shortsme.com'
+
 
 const shortLink = async function (req, res) {
 
@@ -25,45 +26,49 @@ const shortLink = async function (req, res) {
     
         // deconstructing 
     
-        var { longUrl,urlCode} = req.body
+        const { longUrl} = req.body
     
         //// check base url if valid using the validUrl.isUri method
+        
     
-        if (!validUrl.isUri(baseUrl)) {
-            return res.status(401).json('Invalid base URL')
-        }
+        // if (!validUrl.isUri(baseUrl)) {
+        //     return res.status(401).json('Invalid base URL')
+        // } not needed as we have a fix url for application
     
         //if valid we wiil short the url using package shortid
     
-       var urlCode = shortid.generate() // jo piche random codes lgte hai 
+        
     
         if(!validUrl.isUri(longUrl)){
             return res.status(401).json('Invalid long  URL')
     
         }
+        
     
         //check it exist in db or not 
-        let url =await urlModel.findOne({longUrl:longUrl})
-        if(url){
-            res.status(400).send("long url already exists ")
+        let checkUrl =await urlModel.findOne({longUrl:longUrl})
+        if(checkUrl){
+            res.status(400).send("long url already exists  i.e already shortened ")
             return 
         }
         else{
+
+            var  urlCode = shortid.generate() // jo piche random codes lgte hai 
              // join the generated short code the the base url
-            var  shortUrl=baseUrl+" /"+ urlCode
+            var  shortUrl=baseUrl+"/"+ urlCode
             
         }
     
     
           // invoking the Url model and saving to the DB
     
-          let xyz = { longUrl,baseUrl,shortUrl
+          let dbData = { longUrl,urlCode,shortUrl
     
           }
     
-          const resSend= await urlModel.create(xyz)
+          const savedData= await urlModel.create(dbData)
     
-          res.status(200).send({status:true,data:{resSend}})
+          res.status(200).send({status:true,data: savedData})
        
     
     
@@ -85,7 +90,7 @@ const shortLink = async function (req, res) {
     }
 
     catch(error){
-        res.status(500).send({status:false,message:error.message })
+        res.status(500).send({status:false,message:error.message})
     }
 
 

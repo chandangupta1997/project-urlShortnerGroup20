@@ -1,38 +1,29 @@
-const mongoose =require("mongoose")
+const mongoose = require("mongoose");
 
+const urlSchema = new mongoose.Schema(
+  {
+    urlCode: { type: String, required: "url Code Is Required  ", trim: true },
 
-const urlSchema =new mongoose.Schema({
-
-
-
-    urlCode:{type:String},
-    //required:"urlCode is required this will be the base "},
-
-    longUrl:{
-        type:String,
-        required:"long Url is requried "
+    longUrl: {
+      type: String,
+      required: "long Url is requried ",
+      trim: true,
     },
 
-    shortUrl:{
-        type:String,
-        required:"short Url is required "
-    }
-
+    shortUrl: {
+      type: String,
+      required: "short Url is required ",
+      trim: true,
+    },
 
     
-
-    // we can also add create at deleted at 
-
-
-
-
-},{timestamps:true})
-
+  },
+  { timestamps: true } // only shows created at updated at 
+);
 
 // { urlCode:
 //      { mandatory, unique, lowercase, trim },
-//       longUrl: {mandatory, valid url}, 
+//       longUrl: {mandatory, valid url},
 //       shortUrl: {mandatory, unique} }
 
-
-module.exports= mongoose.model("Url",urlSchema)
+module.exports = mongoose.model("Url", urlSchema);
