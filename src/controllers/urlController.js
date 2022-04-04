@@ -24,9 +24,7 @@ const shortLink = async function (req, res) {
             return
         }
     
-        // deconstructing 
-    
-        const { longUrl} = req.body
+      const { longUrl} = req.body
     
         //// check base url if valid using the validUrl.isUri method
         
@@ -69,23 +67,7 @@ const shortLink = async function (req, res) {
           const savedData= await urlModel.create(dbData)
     
           res.status(200).send({status:true,data: savedData})
-       
-    
-    
-    
-    
-    
-    
-    
-    
-            
-        
-        
-    
-    
-    
-    
-    
+  
     
     }
 
@@ -100,10 +82,40 @@ const shortLink = async function (req, res) {
 }
 
 
-const getShortedLink = async function (req, res) {
+const getOriginalLink = async function (req, res) {
+
+    if(!validator.isValidRequestBody(req.params)){
+        return res.status(400).send({status:false,message:"please provide value in params that means shorted links "})
+    }
+
+    let codeCheck =await urlModel.findOne({urlCode:req.params.urlCode})
+    if(codeCheck){
+
+        let OriginalLink = codeCheck.longUrl
+        
+        
+        
+        return res.status(400).send({status:true,data:OriginalLink})
+
+    
+    
+
+
+    }
+    else{
+        return res.status(500).send({staus:false,message:"this short link not found in our db "})
+    }
+
+
+    
+
+
+
+
+
 
 
 }
 
 module.exports.shortLink = shortLink
-module.exports.getShortedLink = getShortedLink
+module.exports.getOriginalLink=getOriginalLink
