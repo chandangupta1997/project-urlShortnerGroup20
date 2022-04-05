@@ -41,6 +41,7 @@ const shortLink = async function (req, res) {
             return res.status(401).json('Invalid long  URL')
     
         }
+
         
     
         //check it exist in db or not 
@@ -88,14 +89,22 @@ const getOriginalLink = async function (req, res) {
         return res.status(400).send({status:false,message:"please provide value in params that means shorted links "})
     }
 
+    // if any how we can chekck urlCode validation do it 
+    if(!validator.isValid(req.params.urlCode)){
+    return res.status(500).send({status:"False",message:"please enter urlCode"})
+    }
+
     let codeCheck =await urlModel.findOne({urlCode:req.params.urlCode})
+    
     if(codeCheck){
 
         let OriginalLink = codeCheck.longUrl
         
         
         
-        return res.status(400).send({status:true,data:OriginalLink})
+        //return res.status(400).send({status:true,data:OriginalLink})
+        return res.status(301).redirect(OriginalLink)
+
 
     
     
@@ -103,7 +112,7 @@ const getOriginalLink = async function (req, res) {
 
     }
     else{
-        return res.status(500).send({staus:false,message:"this short link not found in our db "})
+        return res.status(404).send({staus:false,message:"this short link not found in our db "})
     }
 
 
