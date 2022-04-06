@@ -52,7 +52,7 @@ const shortLink = async function (req, res) {
         }
         else{
 
-            var  urlCode = shortid.generate() // jo piche random codes lgte hai 
+            var  urlCode = shortid.generate().toLowerCase() // jo piche random codes lgte hai 
              // join the generated short code the the base url
             var  shortUrl=baseUrl+"/"+ urlCode
             
