@@ -5,10 +5,41 @@ const validUrl = require('valid-url')
 const shortid = require('shortid')
 const baseUrl ="localhost:3000"
 
+const redis =require('redis')
+const {promisify} =require('util')
+
+
+
 
 
 const urlModel = require("../models/urlModel");
 const validator = require("../validator/validations");
+
+
+//Connect to redis
+const redisClient = redis.createClient(
+  18340,
+  "redis-18340.c212.ap-south-1-1.ec2.cloud.redislabs.com",
+  { no_ready_check: true }
+);
+redisClient.auth("s77LfKEv2ui2WKebhgNJgYQhIsvEA47y", function (err) {
+  if (err) throw err;
+});
+
+redisClient.on("connect", async function () {
+  console.log("Connected to Redis..");
+});
+
+
+
+//1. connect to the server
+//2. use the commands :
+
+//Connection setup for redis
+
+const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+
 
 
 
@@ -47,7 +78,7 @@ const shortLink = async function (req, res) {
         //check it exist in db or not 
         let checkUrl =await urlModel.findOne({longUrl:longUrl})
         if(checkUrl){
-            res.status(400).send("long url already exists  i.e already shortened ")
+            res.status(200).send({status:true,message:"long url already exist here is the short one ",data:checkUrl.shortLink})
             return 
         }
         else{
