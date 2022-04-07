@@ -57,39 +57,37 @@ const createShortLink = async function (req, res) {
       return res.status(401).json("Invalid long  URL");
     }
 
-    //check it exist in db or not
-    let checkUrl = await urlModel.findOne({ longUrl: longUrl });
-    
-  
-    if (checkUrl) {
-      res
-        .status(200)
-        .send({
-          status: true,
-          message: "long url already exist here is the short one ",
-          data: checkUrl.shortUrl, 
-        });
-      return;
+    let fetched = await GET_ASYNC(`${longUrl}`);
+    if (fetched) {
+      let parser = JSON.parse(fetched); // if we dont parse it will give a string value as we stringify while sending it
+      return res.send({ msg: "this is fetched redis data", data: parser });
     } else {
       var urlCode = shortid.generate().toLowerCase(); // jo piche random codes lgte hai
       // join the generated short code the the base url
       var shortUrl = baseUrl + "/" + urlCode;
+
+      // invoking the Url model and saving to the DB
+
+      let dbData = { longUrl, urlCode, shortUrl };
+
+      //sending data to redis
+
+      var savedData = await urlModel.create(dbData);
+      let setData = await SET_ASYNC(
+        `${longUrl}`,
+        JSON.stringify(dbData.shortUrl)
+      );
+
+      res.status(200).send({ status: true, data: savedData });
     }
-
-    // invoking the Url model and saving to the DB
-
-    let dbData = { longUrl, urlCode, shortUrl };
-
-    //sending data to redis
-    let setData = await SET_ASYNC(`${longUrl}`, JSON.stringify(shortUrl));
-
-    var savedData = await urlModel.create(dbData);
-
-    res.status(200).send({ status: true, data: savedData });
   } catch (error) {
+    //check it exist in db or not
+
     res.status(500).send({ status: false, message: error.message });
   }
 };
+
+/////////////////////without redds ////////////////////////
 
 // const getOriginalLink = async function (req, res) {
 //   if (!validator.isValidRequestBody(req.params)) {
@@ -122,21 +120,20 @@ const createShortLink = async function (req, res) {
 //   }
 // };
 
-
 // const getOriginalLink =async function (req,res){
 
 //   try{
 
 //     let urlCode1 =req.param.urlCode
 //   if(!validator.isValid(urlCode1)){
-//     return 
+//     return
 //   }
 
 //   let fetched =GET_ASYNC(`${urlCode1}`)
 //   if(fetched){
 //     const parser =JSON.parse(fetched)
 //     res.send(parser.longUrl)
-    
+
 //   }
 
 //   else if (urlCode1){
@@ -145,75 +142,67 @@ const createShortLink = async function (req, res) {
 //       res.send(" your  Url is not in Db ")
 //       return}
 
-
 //     else{
 //       let setData = await SET_ASYNC(`${urlCode1}`,JSON.stringify(dbCheck))
-//       res.send(dbCheck.longUrl) // you can also send it from redis  but here sending from DB 
-      
+//       res.send(dbCheck.longUrl) // you can also send it from redis  but here sending from DB
+
 //     }
 
-
-
-      
-      
-
-      
-
-      
 //     }
-    
+
 //   }
 
 //   catch(error){res.send(error.message)}
 
-
-
-  
-  
-    
 //     }
 
-
-const getOriginalLink = async function(req, res) {
+const getOriginalLink = async function (req, res) {
   try {
+    let urlCode1 = req.params.urlCode;
+    
 
+    if(!validator.isValid(urlCode1)){
 
-      let urlCode1 = req.params.urlCode
-          //console.log(urlCode1)
+      return res.status(400).send({status:false,message:"please provide valid urlCode"})
 
-      const fetched = await GET_ASYNC(`${urlCode1}`)
-      if (fetched) {
-          const parser = JSON.parse(fetched)
-          console.log("Data Fetched")
-              //console.log(typeof urlCode1)
-          return res.send({msg:"REdis fetched URl ",link :parser.longUrl})
-         // return res.redirect(parseData.longUrl)
-      } else if (urlCode1) {
-          // console.log(url)
-          const dbCheck = await urlModel.findOne({ urlCode: urlCode1 })
-              //console.log(urlFind)
-          if (dbCheck) {
-              const SetData = await SET_ASYNC(`${urlCode1}`, JSON.stringify(dbCheck))
-              console.log("Data Got Stored", SetData)
-              return res.send({msg:"this is from dB ",link:dbCheck.longUrl})
-              //return res.status(302).redirect(dbCheck.longUrl)
+    }
 
-          } else {
-              res.status(400).send({ status: false, message: "There is No Short Url Found" })
-          }
+    const fetched = await GET_ASYNC(`${urlCode1}`);
+    if (fetched) {
+      const parser = JSON.parse(fetched);
+      console.log("Data Fetched");
+      
+      return res.send({ msg: "REdis fetched URl ", link: parser.longUrl });
+      // return res.redirect(parseData.longUrl)
+    } 
+    else   {
+      
+      const dbCheck = await urlModel.findOne({ urlCode: urlCode1 });
+      
+      if (dbCheck) {
+        const SetData = await SET_ASYNC(`${urlCode1}`, JSON.stringify(dbCheck));
+        
+        return res.send({ msg: "this is from dB ", link: dbCheck.longUrl });
+        //return res.status(302).redirect(dbCheck.longUrl)
       } else {
-          return res.status(404).send({ status: false, message: "No Url Code Params Found" })
+        res
+          .status(400)
+          .send({ status: false, message: "There is No Short Url Found" });
       }
-
-
+    } 
+    // else {
+    //   return res
+    //     .status(404)
+    //     .send({ status: false, message: " please check No  Such Url Code Params Found" });
+    // }
   } catch (e) {
-      res.status(500).send(e.message);
+    res.status(500).send(e.message);
   }
-}
-  
+};
 
-
+const getOriginalLink2 = async function (req, res) {
+  let;
+};
 
 module.exports.createShortLink = createShortLink;
 module.exports.getOriginalLink = getOriginalLink;
-

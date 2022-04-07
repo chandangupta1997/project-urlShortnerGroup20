@@ -18,7 +18,7 @@ const urlSchema = new mongoose.Schema(
 
     
   },
-  { timestamps: true } // only shows created at updated at 
+  
 );
 
 // { urlCode:
