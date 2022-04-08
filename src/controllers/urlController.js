@@ -39,7 +39,7 @@ const createShortLink = async function (req, res) {
       !validator.isValidRequestBody(req.body) ||
       !validator.isValid(req.body)
     ) {
-      res.status(400).send("empty body");
+      res.status(400).send({status:false,message:"body is empty"});
       return;
     }
 
@@ -53,8 +53,8 @@ const createShortLink = async function (req, res) {
 
     //if valid we wiil short the url using package shortid
 
-    if (!validUrl.isUri(longUrl.trim())) {
-      return res.status(400).json("Invalid long  URL");
+    if (!validUrl.isUri(longUrl)) {
+      return res.status(400).json({status:false,message:"Invalid long  URL"});
     }
 
     let fetched = await GET_ASYNC(`${longUrl}`);
@@ -72,13 +72,15 @@ const createShortLink = async function (req, res) {
 
       //sending data to redis
 
-      var savedData = await urlModel.create(dbData);
+      var savedData = await urlModel.create(dbData)//.select({_id:0,_v:0});
+      //let id =savedData._id
+      //let findSend =await urlModel.findById(id).select({_id:0,_v:0})
       let setData = await SET_ASYNC(
         `${longUrl}`,
         JSON.stringify(dbData.shortUrl)
       );
 
-      res.status(200).send({ status: true, data: savedData });
+      res.status(201).send({ status: true, data: savedData });
     }
   } catch (error) {
     //check it exist in db or not
@@ -177,7 +179,7 @@ const getOriginalLink = async function (req, res) {
     } 
     else   {
       
-      const dbCheck = await urlModel.findOne({ urlCode: urlCode1 });
+      const dbCheck = await urlModel.findOne({ urlCode: urlCode1 })
       
       if (dbCheck) {
         const SetData = await SET_ASYNC(`${urlCode1}`, JSON.stringify(dbCheck));

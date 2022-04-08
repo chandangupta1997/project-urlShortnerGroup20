@@ -17,7 +17,7 @@ const urlSchema = new mongoose.Schema(
       type: String,
       required: "short Url is required ",
       trim: true,
-    },
+    }
   }
    
 );
