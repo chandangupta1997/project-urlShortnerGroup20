@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 
 const urlSchema = new mongoose.Schema(
   {
-    urlCode: { type: String, required: "url Code Is Required  ", trim: true },
+    urlCode: { type: String, 
+      required: "url Code Is Required  ",
+       trim: true,
+      },
 
     longUrl: {
       type: String,
@@ -15,10 +18,8 @@ const urlSchema = new mongoose.Schema(
       required: "short Url is required ",
       trim: true,
     },
-
-    
-  },
-  { timestamps: true } // only shows created at updated at 
+  }
+   
 );
 
 // { urlCode:
