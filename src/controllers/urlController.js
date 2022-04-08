@@ -182,8 +182,8 @@ const getOriginalLink = async function (req, res) {
       if (dbCheck) {
         const SetData = await SET_ASYNC(`${urlCode1}`, JSON.stringify(dbCheck));
         
-        return res.send({ msg: "this is from dB ", link: dbCheck.longUrl });
-        //return res.status(302).redirect(dbCheck.longUrl)
+        //return res.send({ msg: "this is from dB ", link: dbCheck.longUrl });
+        return res.status(302).redirect(dbCheck.longUrl)
       } else {
         res
           .status(404)
